@@ -40,6 +40,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useOrgContext(): OrgContextValue {
   const ctx = useContext(OrgContext)
   if (!ctx) throw new Error('useOrgContext must be used inside OrgProvider')
