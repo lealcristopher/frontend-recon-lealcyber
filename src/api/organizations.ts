@@ -21,28 +21,36 @@ export interface Invitation {
   created_at: string
 }
 
+export interface InvitePreview {
+  email: string
+  org_name: string
+}
+
 export const organizationsApi = (client: AxiosInstance) => ({
   list: (): Promise<Organization[]> =>
-    client.get('/organizations/').then((r) => r.data),
+    client.get('/orgs/').then((r) => r.data),
 
   create: (name: string, slug: string): Promise<Organization> =>
-    client.post('/organizations/', { name, slug }).then((r) => r.data),
+    client.post('/orgs/', { name, slug }).then((r) => r.data),
 
   getMembers: (id: number): Promise<Member[]> =>
-    client.get(`/organizations/${id}/members`).then((r) => r.data),
+    client.get(`/orgs/${id}/members`).then((r) => r.data),
 
   getInvitations: (id: number): Promise<Invitation[]> =>
-    client.get(`/organizations/${id}/invitations`).then((r) => r.data),
+    client.get(`/orgs/${id}/invitations`).then((r) => r.data),
 
   invite: (id: number, email: string): Promise<Invitation> =>
-    client.post(`/organizations/${id}/invitations`, { email }).then((r) => r.data),
+    client.post(`/orgs/${id}/invitations`, { email }).then((r) => r.data),
+
+  previewInvite: (token: string): Promise<InvitePreview> =>
+    client.get(`/orgs/invitations/preview/${token}`).then((r) => r.data),
 
   acceptInvite: (token: string): Promise<{ message: string; organization_id: number }> =>
-    client.post(`/organizations/invitations/${token}/accept`).then((r) => r.data),
+    client.post(`/orgs/invitations/${token}/accept`).then((r) => r.data),
 
   removeMember: (orgId: number, userId: number): Promise<void> =>
-    client.delete(`/organizations/${orgId}/members/${userId}`).then((r) => r.data),
+    client.delete(`/orgs/${orgId}/members/${userId}`).then((r) => r.data),
 
   revokeInvitation: (orgId: number, invId: number): Promise<void> =>
-    client.delete(`/organizations/${orgId}/invitations/${invId}`).then((r) => r.data),
+    client.delete(`/orgs/${orgId}/invitations/${invId}`).then((r) => r.data),
 })

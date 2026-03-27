@@ -13,7 +13,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) return <p>Loading...</p>
   if (!isAuthenticated) {
-    loginWithRedirect()
+    loginWithRedirect({ appState: { returnTo: window.location.pathname + window.location.search } })
     return null
   }
   return <>{children}</>

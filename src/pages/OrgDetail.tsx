@@ -32,15 +32,24 @@ export default function OrgDetail() {
     const api = organizationsApi(client)
 
     api.getMembers(orgId)
-      .then(setMembers)
-      .catch((e) => setErrorMembers(e.message))
+      .then((data) => {
+        setMembers(data)
+        const me = data.find((m) => m.email === user?.email)
+        if (me?.role === 'admin') {
+          api.getInvitations(orgId)
+            .then(setInvitations)
+            .catch((e) => setErrorInvitations(e.message))
+            .finally(() => setLoadingInvitations(false))
+        } else {
+          setLoadingInvitations(false)
+        }
+      })
+      .catch((e) => {
+        setErrorMembers(e.message)
+        setLoadingInvitations(false)
+      })
       .finally(() => setLoadingMembers(false))
-
-    api.getInvitations(orgId)
-      .then(setInvitations)
-      .catch((e) => setErrorInvitations(e.message))
-      .finally(() => setLoadingInvitations(false))
-  }, [client, orgId])
+  }, [client, orgId, user?.email])
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault()

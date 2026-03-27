@@ -1,10 +1,18 @@
+import { useEffect } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
+import { useApiClient } from '../api/client'
+import { organizationsApi } from '../api/organizations'
 import { useOrgContext } from '../context/OrgContext'
 
 export default function Layout() {
   const { user, logout } = useAuth0()
-  const { activeOrg, setActiveOrg, orgs } = useOrgContext()
+  const client = useApiClient()
+  const { activeOrg, setActiveOrg, orgs, setOrgs } = useOrgContext()
+
+  useEffect(() => {
+    organizationsApi(client).list().then(setOrgs).catch(() => {})
+  }, [client]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div>
