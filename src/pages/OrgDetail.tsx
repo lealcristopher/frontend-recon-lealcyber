@@ -3,12 +3,15 @@ import { useParams, Link } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useApiClient } from '../api/client'
 import { organizationsApi, type Member, type Invitation } from '../api/organizations'
+import { useOrgContext } from '../context/OrgContext'
 
 export default function OrgDetail() {
   const { id } = useParams<{ id: string }>()
   const orgId = Number(id)
   const client = useApiClient()
   const { user } = useAuth0()
+  const { orgs } = useOrgContext()
+  const isAdmin = orgs.find((o) => o.id === orgId)?.role === 'admin'
 
   const [members, setMembers] = useState<Member[]>([])
   const [invitations, setInvitations] = useState<Invitation[]>([])
@@ -25,31 +28,24 @@ export default function OrgDetail() {
   const [confirmRemove, setConfirmRemove] = useState<number | null>(null)
   const [confirmRevoke, setConfirmRevoke] = useState<number | null>(null)
 
-  const myRole = members.find((m) => m.email === user?.email)?.role ?? null
-  const isAdmin = myRole === 'admin'
 
   useEffect(() => {
     const api = organizationsApi(client)
 
     api.getMembers(orgId)
-      .then((data) => {
-        setMembers(data)
-        const me = data.find((m) => m.email === user?.email)
-        if (me?.role === 'admin') {
-          api.getInvitations(orgId)
-            .then(setInvitations)
-            .catch((e) => setErrorInvitations(e.message))
-            .finally(() => setLoadingInvitations(false))
-        } else {
-          setLoadingInvitations(false)
-        }
-      })
-      .catch((e) => {
-        setErrorMembers(e.message)
-        setLoadingInvitations(false)
-      })
+      .then(setMembers)
+      .catch((e) => setErrorMembers(e.message))
       .finally(() => setLoadingMembers(false))
-  }, [client, orgId, user?.email])
+
+    if (isAdmin) {
+      api.getInvitations(orgId)
+        .then(setInvitations)
+        .catch((e) => setErrorInvitations(e.message))
+        .finally(() => setLoadingInvitations(false))
+    } else {
+      setLoadingInvitations(false)
+    }
+  }, [client, orgId, isAdmin])
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault()
@@ -144,7 +140,7 @@ export default function OrgDetail() {
                   <td style={tdStyle}>{new Date(m.joined_at).toLocaleDateString()}</td>
                   {isAdmin && (
                     <td style={tdStyle}>
-                      {m.email !== user?.email && (
+                      {m.auth_id !== user?.sub && (
                         confirmRemove === m.usuario_id ? (
                           <span>
                             Sure?{' '}
