@@ -12,14 +12,14 @@ export default function AcceptInvite() {
   const navigate = useNavigate()
 
   const [preview, setPreview] = useState<InvitePreview | null>(null)
-  const [previewLoading, setPreviewLoading] = useState(true)
+  const [previewLoading, setPreviewLoading] = useState(() => !!token)
   const [previewInvalid, setPreviewInvalid] = useState(false)
 
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!token) { setPreviewLoading(false); return }
+    if (!token) return
     organizationsApi(client).previewInvite(token)
       .then(setPreview)
       .catch(() => setPreviewInvalid(true))
