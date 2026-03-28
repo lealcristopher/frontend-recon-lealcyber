@@ -4,6 +4,10 @@ import { Auth0Provider } from '@auth0/auth0-react'
 import './index.css'
 import App from './App.tsx'
 
+function onRedirectCallback(appState?: { returnTo?: string }) {
+  window.history.replaceState({}, document.title, appState?.returnTo ?? '/')
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Auth0Provider
@@ -13,6 +17,7 @@ createRoot(document.getElementById('root')!).render(
         redirect_uri: window.location.origin,
         audience: import.meta.env.VITE_AUTH0_AUDIENCE,
       }}
+      onRedirectCallback={onRedirectCallback}
     >
       <App />
     </Auth0Provider>
