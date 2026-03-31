@@ -10,6 +10,7 @@ export interface Organization {
 export interface Member {
   usuario_id: number
   email: string
+  auth_id: string
   role: 'admin' | 'member'
   joined_at: string
 }
